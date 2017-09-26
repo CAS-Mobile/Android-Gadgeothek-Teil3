@@ -10,10 +10,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import ch.hsr.mge.gadgeothek.R;
 import ch.hsr.mge.gadgeothek.service.Callback;
 import ch.hsr.mge.gadgeothek.service.LibraryService;
+import ch.hsr.mge.gadgeothek.ui.loans.LoansFragment;
+import ch.hsr.mge.gadgeothek.ui.reservations.NewReservationActivity;
+import ch.hsr.mge.gadgeothek.ui.reservations.ReservationsFragment;
 
 public class GadgeothekActivity extends AppCompatActivity {
 
@@ -31,9 +35,38 @@ public class GadgeothekActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         fab = (FloatingActionButton) findViewById(R.id.fab);
-        viewPager = (ViewPager) findViewById(R.id.viewpager);
+        fab.hide(); // hidden on the first view page
 
-        // TODO ViewPager erstellen und Fragments angeben
+        viewPager = (ViewPager) findViewById(R.id.viewpager);
+        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
+        adapter.addFragment(new LoansFragment(), getString(R.string.tab_loans));
+        adapter.addFragment(new ReservationsFragment(), getString(R.string.tab_reservations));
+        viewPager.setAdapter(adapter);
+        if (savedInstanceState != null) {
+            viewPager.setCurrentItem(savedInstanceState.getInt(ACTIVE_TAB, 0), false);
+        }
+
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                switch (position) {
+                    case 1:
+                        fab.show();
+                        break;
+                    default:
+                        fab.hide();
+                        break;
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+            }
+        });
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
@@ -82,5 +115,11 @@ public class GadgeothekActivity extends AppCompatActivity {
 
     public Toolbar getToolbar() {
         return toolbar;
+    }
+
+    public void onAddReservationButton(View view) {
+        Intent intent = new Intent(this, NewReservationActivity.class);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_right_to_left, R.anim.slide_out_right_to_left);
     }
 }
